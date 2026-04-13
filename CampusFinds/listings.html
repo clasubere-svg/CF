@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://ijfjkvwvkunhkipchfep.supabase.co">
+
+    <meta charset="UTF-8">
+    <title>CampusFinds | View Listings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<header class="navbar">
+    <div class="logo">
+        <a href="index.html" class="logo">
+            <img src="images/Logo.png" alt="CampusFinds Logo">
+        </a>
+    </div>
+
+    <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="report.html">Report Item</a>
+        <a href="ai-matching.html">AI Matching</a>
+        <a class="active" href="listings.html">View Listings</a>
+    </nav>
+
+    <div class="nav-actions">
+       <button class="btn login" onclick="openModal('loginModal')">Login</button>
+       <button class="btn signup" onclick="openModal('signupModal')">Signup</button>
+
+       <div class="profile-area" id="profileArea" style="display:none;">
+           <img id="navProfilePic" alt="Profile" style="cursor:pointer;border-radius:50%;width:38px;height:38px;object-fit:cover;border:2px solid #3b82f6" title="View Profile">
+                <button class="logout-btn" onclick="logoutUser()">Logout</button>
+       </div>
+    </div>
+
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" onclick="toggleNav()">
+          <span></span><span></span><span></span>
+        </button>
+    </header>
+
+<!-- Listings Page -->
+<main class="page">
+    <section class="listings-wrapper">
+
+        <h2 class="page-title">Browse Items</h2>
+        <p class="page-subtitle">Search through reported lost and found items</p>
+
+        <!-- Search & Filters -->
+        <div class="search-row">
+            <div class="search-box">
+                
+                <input type="text" id="searchInput" placeholder="Search by title, description, or location">
+            </div>
+
+            <select class="filter" id="typeFilter">
+                <option value="All">All Types</option>
+                <option value="Lost">Lost</option>
+                <option value="Found">Found</option>
+            </select>
+
+            <select class="filter" id="categoryFilter">
+                <option value="All">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Wallet">Wallet</option>
+                <option value="Keys">Keys</option>
+                <option value="Books">Books</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Others">Others</option>
+            </select>
+        </div>
+
+        <div id="itemsContainer" class="items-grid">
+          <!-- Skeleton cards shown while data loads -->
+          <div class="skeleton-card" id="sk1"></div>
+          <div class="skeleton-card" id="sk2"></div>
+          <div class="skeleton-card" id="sk3"></div>
+          <div class="skeleton-card" id="sk4"></div>
+          <div class="skeleton-card" id="sk5"></div>
+          <div class="skeleton-card" id="sk6"></div>
+        </div>
+        <style>
+          .skeleton-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            height: 260px;
+            position: relative;
+            overflow: hidden;
+          }
+          .skeleton-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+            animation: shimmer 1.4s infinite;
+          }
+          @keyframes shimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        
+        .logout-btn {
+            background: rgba(248,113,113,0.1);
+            color: #f87171;
+            border: 1px solid rgba(248,113,113,0.2);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.4); }
+        </style>
+
+        <!-- ITEM DETAIL MODAL STYLES -->
+        <style>
+            /* ── Item Detail Modal ── */
+            .item-modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.65);
+                backdrop-filter: blur(6px);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+                animation: fadeInOverlay 0.2s ease;
+            }
+            .item-modal.open { display: flex; }
+            @keyframes fadeInOverlay { from { opacity:0 } to { opacity:1 } }
+
+            .item-modal-content {
+                background: #1a1f2e;
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 20px;
+                width: 90%;
+                max-width: 520px;
+                max-height: 88vh;
+                overflow-y: auto;
+                padding: 0;
+                position: relative;
+                box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+                animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            }
+            @keyframes slideUp { from { transform:translateY(30px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+
+            .item-modal-content::-webkit-scrollbar { width: 5px; }
+            .item-modal-content::-webkit-scrollbar-track { background: transparent; }
+            .item-modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+            .modal-img-wrap {
+                width: 100%;
+                height: 220px;
+                background: #0f1219;
+                border-radius: 20px 20px 0 0;
+                overflow: hidden;
+                position: relative;
+            }
+            .modal-img-wrap img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                padding: 16px;
+            }
+            .modal-img-placeholder {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 64px;
+                opacity: 0.3;
+            }
+
+            .modal-body {
+                padding: 24px 28px 28px;
+            }
+            .modal-header-row {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .modal-title-block h2 {
+                font-size: 22px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin: 0 0 6px;
+                text-transform: capitalize;
+            }
+            .modal-type-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+            .modal-type-badge.lost { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+            .modal-type-badge.found { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+
+            .close-item-modal {
+                position: absolute;
+                top: 14px;
+                right: 18px;
+                font-size: 22px;
+                color: rgba(255,255,255,0.5);
+                cursor: pointer;
+                z-index: 10;
+                width: 34px;
+                height: 34px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.06);
+                transition: all 0.2s;
+                line-height: 1;
+            }
+            .close-item-modal:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+            .modal-info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .modal-info-card {
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 12px;
+                padding: 12px 14px;
+            }
+            .modal-info-card .info-label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                color: rgba(255,255,255,0.4);
+                margin-bottom: 4px;
+            }
+            .modal-info-card .info-value {
+                font-size: 14px;
+                font-weight: 600;
+                color: #e2e8f0;
+                text-transform: capitalize;
+            }
+            .modal-info-full {
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 12px;
+                padding: 14px;
+                margin-bottom: 12px;
+            }
+            .modal-info-full .info-label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                color: rgba(255,255,255,0.4);
+                margin-bottom: 6px;
+            }
+            .modal-info-full .info-value {
+                font-size: 14px;
+                color: #cbd5e1;
+                line-height: 1.6;
+            }
+
+            .modal-reporter-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: rgba(59,130,246,0.08);
+                border: 1px solid rgba(59,130,246,0.15);
+                border-radius: 12px;
+                padding: 12px 14px;
+                margin-top: 4px;
+            }
+            .modal-reporter-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: rgba(59,130,246,0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+            .modal-reporter-info .info-label {
+                font-size: 11px;
+                color: rgba(255,255,255,0.4);
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                font-weight: 600;
+            }
+            .modal-reporter-info .info-value {
+                font-size: 14px;
+                font-weight: 600;
+                color: #93c5fd;
+            }
+
+            /* ── Profile Modal ── */
+            #profileModal .modal-box {
+                background: #1a1f2e !important;
+                border: 1px solid rgba(255,255,255,0.08) !important;
+                border-radius: 20px !important;
+                padding: 0 !important;
+                overflow: hidden;
+                box-shadow: 0 32px 80px rgba(0,0,0,0.6) !important;
+                max-width: 420px !important;
+                width: 90% !important;
+                position: relative;
+            }
+
+            .profile-modal-header {
+                background: linear-gradient(135deg, #1e3a5f 0%, #1a1f2e 100%);
+                padding: 36px 28px 24px;
+                text-align: center;
+                position: relative;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+
+            .profile-modal-header h2 {
+                font-size: 22px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin: 0 0 20px;
+                text-align: center;
+            }
+
+            .profile-pic-wrapper {
+                position: relative;
+                display: inline-block;
+                cursor: pointer;
+                margin: 0 auto;
+            }
+
+            .profile-pic-wrapper img {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid #3b82f6;
+                box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+                display: block;
+                transition: opacity 0.2s;
+            }
+
+            .profile-pic-wrapper:hover img { 
+                opacity: 0.75; 
+            }
+
+            .profile-pic-edit-overlay {
+                position: absolute;
+                inset: 0;
+                border-radius: 50%;
+                background: rgba(0,0,0,0.6);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.2s;
+                pointer-events: none;
+                gap: 4px;
+            }
+
+            .profile-pic-wrapper:hover .profile-pic-edit-overlay { 
+                opacity: 1; 
+            }
+
+            .profile-pic-edit-overlay span { 
+                font-size: 24px; 
+            }
+
+            .profile-pic-edit-overlay p { 
+                font-size: 11px; 
+                color: #fff; 
+                font-weight: 600; 
+                margin: 0; 
+                letter-spacing: 0.5px; 
+                text-transform: uppercase;
+            }
+
+            .profile-pic-hint {
+                font-size: 12px;
+                color: rgba(255,255,255,0.5);
+                margin-top: 12px;
+                text-align: center;
+            }
+
+            /* Hidden real file input, triggered by clicking the picture */
+            #profileChangePic { 
+                display: none !important; 
+            }
+
+            .profile-modal-body {
+                padding: 24px 28px;
+                background: #1a1f2e;
+            }
+
+            .profile-field {
+                margin-bottom: 16px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 12px;
+                padding: 14px 16px;
+            }
+
+            .profile-field .field-label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                color: rgba(255,255,255,0.4);
+                margin-bottom: 6px;
+            }
+
+            .profile-field .field-value {
+                font-size: 15px;
+                font-weight: 600;
+                color: #f1f5f9;
+            }
+
+            .profile-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 24px;
+            }
+
+            .profile-save-btn {
+                width: 100%;
+                padding: 14px;
+                border-radius: 12px;
+                border: none;
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                color: #fff;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: none;
+                box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+            }
+
+            .profile-save-btn:hover { 
+                background: linear-gradient(135deg, #2563eb, #1d4ed8); 
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+            }
+
+            /* Close button styling */
+            #profileModal .close {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                z-index: 10;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.08);
+                font-size: 22px;
+                color: rgba(255,255,255,0.6);
+                cursor: pointer;
+                transition: all 0.2s;
+                border: none;
+                line-height: 1;
+            }
+
+            #profileModal .close:hover { 
+                background: rgba(255,255,255,0.15); 
+                color: #fff;
+                transform: rotate(90deg);
+            }
+        </style>
+
+        <!-- ITEM DETAIL MODAL -->
+        <div id="itemModal" class="item-modal">
+            <div class="item-modal-content">
+                <span class="close-item-modal" onclick="closeItemModal()">&times;</span>
+
+                <!-- Image -->
+                <div class="modal-img-wrap">
+                    <img id="modalImage" alt="Item" onerror="this.style.display='none';document.getElementById('modalImgPlaceholder').style.display='flex'">
+                    <div class="modal-img-placeholder" id="modalImgPlaceholder" style="display:none"></div>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Title + badge -->
+                    <div class="modal-header-row">
+                        <div class="modal-title-block">
+                            <h2 id="modalTitle"></h2>
+                            <span id="modalTypeBadge" class="modal-type-badge lost"></span>
+                        </div>
+                    </div>
+
+                    <!-- Info grid -->
+                    <div class="modal-info-grid">
+                        <div class="modal-info-card">
+                            <div class="info-label"> Category</div>
+                            <div class="info-value" id="modalCategory">—</div>
+                        </div>
+                        <div class="modal-info-card">
+                            <div class="info-label"> Location</div>
+                            <div class="info-value" id="modalLocation">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="modal-info-full">
+                        <div class="info-label"> Description</div>
+                        <div class="info-value" id="modalDescription">—</div>
+                    </div>
+
+                    <!-- Reporter -->
+                    <div class="modal-reporter-row">
+                        <div class="modal-reporter-avatar"> </div>
+                        <div class="modal-reporter-info">
+                            <div class="info-label">Reported by</div>
+                            <div class="info-value" id="modalReporter">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="modal-status-row">
+                        <div class="info-label">Status</div>
+                        <span id="modalStatusBadge" class="modal-status-badge pending">Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT ITEM MODAL -->
+        <div id="editModal" class="item-modal">
+            <div class="item-modal-content" style="max-width:500px;">
+                <span class="close-item-modal" onclick="closeEditModal()">&times;</span>
+
+                <!-- Header -->
+                <div style="padding:24px 28px 0;">
+                    <h2 style="font-size:20px;font-weight:700;color:#f1f5f9;margin:0 0 4px;">Edit Item</h2>
+                    <p style="font-size:13px;color:rgba(255,255,255,0.45);margin:0 0 22px;">Update the details for this reported item</p>
+                </div>
+
+                <!-- Form body -->
+                <div style="padding:0 28px 28px;display:flex;flex-direction:column;gap:14px;">
+
+                    <!-- Item Name -->
+                    <div class="edit-field">
+                        <label class="edit-label">Item Name</label>
+                        <input type="text" id="editName" class="edit-input" placeholder="e.g. Black Wallet">
+                    </div>
+
+                    <!-- Category dropdown -->
+                    <div class="edit-field">
+                        <label class="edit-label">Category</label>
+                        <select id="editCategory" class="edit-input edit-select">
+                            <option value="" disabled>Select a category…</option>
+                            <option value="Electronics"> Electronics</option>
+                            <option value="Wallet"> Wallet / Purse</option>
+                            <option value="Keys"> Keys</option>
+                            <option value="Books"> Books / Notebooks</option>
+                            <option value="ID / Cards"> ID / Cards</option>
+                            <option value="Clothing"> Clothing</option>
+                            <option value="Accessories"> Accessories / Jewelry</option>
+                            <option value="Bag / Backpack"> Bag / Backpack</option>
+                            <option value="Umbrella"> Umbrella</option>
+                            <option value="Sports Equipment"> Sports Equipment</option>
+                            <option value="Others"> Others</option>
+                        </select>
+                    </div>
+
+                    <!-- Two-col row: Location -->
+                    <div class="edit-field">
+                        <label class="edit-label">Location</label>
+                        <input type="text" id="editLocation" class="edit-input" placeholder="e.g. Library Level 2">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="edit-field">
+                        <label class="edit-label">Description</label>
+                        <textarea id="editDescription" class="edit-input edit-textarea" placeholder="Describe the item (color, brand, marks…)"></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display:flex;gap:10px;margin-top:4px;">
+                        <button onclick="closeEditModal()" style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Cancel</button>
+                        <button onclick="saveEdit()" style="flex:2;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,0.3);transition:opacity 0.2s,transform 0.15s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'"> Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+    <div class="modal-box">
+        <span class="close" onclick="closeModal('loginModal')">&times;</span>
+        <h2>Login</h2>
+        <p class="modal-sub">Enter your email and password to access your account</p>
+        <div>
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="your.email@example.com">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password">
+            <button type="button" class="modal-btn" onclick="loginUser()">Login</button>
+        </div>
+        <p class="modal-link">
+            Don't have an account?
+            <a onclick="switchModal('loginModal','signupModal')">Signup here</a>
+        </p>
+    </div>
+</div>
+
+    <!-- SIGNUP MODAL -->
+    <div class="modal" id="signupModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeModal('signupModal')">&times;</span>
+            <h2>Sign Up</h2>
+            <p class="modal-sub">Create a new account to get started</p>
+            <div>
+                <label>Full Name</label>
+                <input type="text" id="signupName" placeholder="Enter your name" required>
+                <label>Email</label>
+                <input type="email" id="signupEmail" placeholder="your.email@example.com" required>
+                <label>Phone Number</label>
+                <input type="tel" id="signupPhone" placeholder="e.g. 09123456789">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="Create a password" required>
+                <label>Confirm Password</label>
+                <input type="password" id="signupConfirm" placeholder="Confirm your password" required>
+
+                <div class="profile-upload">
+                    <label for="profileInput" class="profile-circle">
+                        <img id="profilePreview" src="images/default-avatar.png" alt="Profile">
+                        <div class="upload-icon">+</div>
+                    </label>
+                    <input type="file" id="profileInput" accept="image/*">
+                    <p>Profile Picture</p>
+                </div>
+
+                <button type="button" class="modal-btn" onclick="signupUser()">Signup</button>
+            </div>
+            <p class="modal-link">
+                Already have an account?
+                <a onclick="switchModal('signupModal','loginModal')">Login here</a>
+            </p>
+        </div>
+    </div>
+
+<script src="js/supabase.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/main.js" defer></script>
+
+
+    <!-- PROFILE MODAL -->
+    <div class="modal" id="profileModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+
+            <div class="profile-modal-header">
+                <h2>My Profile</h2>
+                <label for="profileChangePic" class="profile-pic-wrapper" title="Click to change photo">
+                    <img id="profileModalPic" src="images/default-avatar.png" alt="Profile">
+                    <div class="profile-pic-edit-overlay">
+                        <span></span>
+                        <p>Change Photo</p>
+                    </div>
+                </label>
+                <p class="profile-pic-hint">Click photo to change</p>
+                <input type="file" id="profileChangePic" accept="image/*" onchange="previewProfileChange(this)">
+            </div>
+
+            <div class="profile-modal-body">
+                <div class="profile-field">
+                    <div class="field-label">Full Name</div>
+                    <div class="field-value" id="profileModalName">—</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">Email</div>
+                    <div class="field-value" id="profileModalEmail">—</div>
+                </div>
+                <div class="profile-field">
+                    <div class="field-label">Phone Number</div>
+                    <div class="field-value" id="profileModalPhone">—</div>
+                </div>
+                <div class="profile-actions">
+                    <button id="changePicBtn" type="button" class="profile-save-btn" onclick="changeProfilePicture()"> Save Photo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function previewProfileChange(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('profileModalPic').src = e.target.result;
+                const btn = document.getElementById('changePicBtn');
+                if (btn) { btn.style.display = 'block'; }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    </script>
+
+
+<script>
+function toggleNav(){
+  var btn = document.getElementById('hamburgerBtn');
+  var links = document.querySelector('.nav-links');
+  var actions = document.querySelector('.nav-actions');
+  btn.classList.toggle('open');
+  links.classList.toggle('open');
+  actions.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>
