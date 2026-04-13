@@ -1,0 +1,531 @@
+/* ============================================
+   CAMPUSFINDS — RESPONSIVE CSS
+   Breakpoints:
+     xs  : ≤360px  (very small phones)
+     sm  : ≤480px  (small phones)
+     md  : ≤768px  (phones / large phones)
+     lg  : ≤1024px (tablets)
+     xl  : ≥1200px (desktop)
+     xxl : ≥1400px (wide desktop)
+   ============================================ */
+
+/* ── BASE RESETS ── */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1, h2, h3, h4, p, span, a {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+button {
+  white-space: nowrap;
+}
+
+/* ── FLEXIBLE CONTAINERS ── */
+.container,
+.page,
+.report-wrapper,
+.listings-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ── LOGO: fix fixed width so it scales ── */
+.logo img {
+  height: auto !important;
+  width: clamp(100px, 30vw, 170px) !important;
+  max-height: 80px;
+}
+
+/* ============================================
+    TABLET  ≤ 1024px
+   ============================================ */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 14px 24px;
+    margin: 12px 16px;
+  }
+  .nav-links {
+    gap: 2px;
+  }
+  .nav-links a {
+    font-size: 13px;
+    padding: 7px 11px;
+  }
+  .report-wrapper {
+    padding: 20px;
+  }
+  .report-card {
+    padding: 24px;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero h2 {
+    font-size: 36px;
+  }
+  .hero h3 {
+    font-size: 32px;
+  }
+  .hero-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .listing-grid,
+  .items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .match-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* ============================================
+    MOBILE  ≤ 768px
+   ============================================ */
+@media (max-width: 768px) {
+
+/* ── Navbar ── */
+  .navbar {
+    padding: 12px 16px;
+    margin: 10px 12px;
+    border-radius: 12px;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+  .hamburger {
+    display: flex;
+  }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 4px;
+    padding: 10px 0 4px;
+    order: 3;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links a {
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    width: 100%;
+  }
+  .nav-actions {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    padding: 4px 0 8px;
+    order: 4;
+  }
+  .nav-actions.open {
+    display: flex;
+  }
+  .nav-actions .btn {
+    width: 100%;
+    text-align: center;
+    padding: 11px 14px;
+  }
+  .logo {
+    order: 1;
+  }
+  .hamburger {
+    order: 2;
+    margin-left: auto;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 32px 16px 40px;
+    min-height: calc(100vh - 90px);
+    justify-content: center;
+  }
+  .hero h2 {
+    font-size: 28px;
+    margin-top: 14px;
+  }
+  .hero h3 {
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+  }
+  .action-btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+  /* Shrink circles on mobile so they never cover text */
+  .circle { opacity: 0.12 !important; }
+  .c1,.c3,.c6 { width: 60px !important; height: 60px !important; }
+  .c2,.c4,.c5 { width: 70px !important; height: 70px !important; }
+  .c7,.c8,.c9,.c10 { width: 50px !important; height: 50px !important; }
+
+  /* ── Report card ── */
+  .report-wrapper {
+    padding: 12px;
+  }
+  .report-card {
+    padding: 18px 16px;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .toggle-group {
+    flex-direction: column;
+  }
+  .toggle-group .toggle {
+    padding: 13px 14px;
+    font-size: 14px;
+  }
+
+  /* ── Search + Filter ── */
+  .search-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .filter {
+    width: 100%;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  /* ── Listings ── */
+  .listings-wrapper {
+    padding: 12px;
+  }
+  .page-title {
+    font-size: 22px;
+  }
+  .listing-grid,
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+  .item-image {
+    height: 160px;
+  }
+
+  /* ── Match grid ── */
+  .match-grid {
+    grid-template-columns: 1fr;
+  }
+  .match-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Modals ── */
+  .modal-box {
+    width: 94%;
+    max-width: 100%;
+    padding: 20px 16px;
+    border-radius: 14px;
+    margin: 0 10px;
+  }
+  .item-modal-content {
+    width: 94%;
+    padding: 18px 14px;
+  }
+  .modal-image {
+    height: 200px;
+  }
+
+  /* ── Profile ── */
+  .profile-circle {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-area img {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* ── Inputs ── */
+  input, textarea, select {
+    font-size: 16px; /* prevents iOS zoom-in on focus */
+  }
+
+  /* ── Section spacing ── */
+  section {
+    margin-bottom: 20px;
+  }
+
+  /* ── AI matching page ── */
+  .ai-section {
+    padding: 16px;
+  }
+  .ai-upload-btn {
+    width: 100%;
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+
+/* ============================================
+    SMALL PHONES  ≤ 480px
+   ============================================ */
+@media (max-width: 480px) {
+
+  /* ── Navbar ── */
+  .navbar {
+    padding: 10px 12px;
+    margin: 6px 8px;
+    border-radius: 10px;
+  }
+  .logo img {
+    max-height: 50px !important;
+    width: clamp(80px, 36vw, 130px) !important;
+  }
+  .btn {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 24px 12px 32px;
+    min-height: calc(100vh - 80px);
+  }
+  .hero h2 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .hero h3 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  .hero p {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .badge {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  /* ── Buttons ── */
+  .action-btn {
+    font-size: 13px;
+    padding: 13px 14px;
+    border-radius: 12px;
+  }
+
+  /* ── Report card ── */
+  .report-wrapper {
+    padding: 8px;
+  }
+  .report-card {
+    padding: 14px 12px;
+    border-radius: 14px;
+  }
+  .card-title {
+    font-size: 20px;
+  }
+  .card-sub {
+    font-size: 12px;
+  }
+  .field-label {
+    font-size: 12px;
+  }
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="datetime-local"],
+  .field textarea {
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .submit {
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  /* ── Upload box ── */
+  .upload-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* ── Listings ── */
+  .listings-wrapper {
+    padding: 8px;
+    margin-top: 10px;
+  }
+  .page-title {
+    font-size: 20px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+  }
+  .item-card {
+    padding: 12px;
+  }
+  .item-card h3 {
+    font-size: 15px;
+  }
+  .item-image {
+    height: 140px;
+  }
+
+  /* ── Modal ── */
+  .modal-box {
+    padding: 16px 12px;
+  }
+  .modal-box h2 {
+    font-size: 18px;
+  }
+  .modal-btn {
+    padding: 11px;
+    font-size: 14px;
+  }
+  .modal-image {
+    height: 170px;
+  }
+  .item-actions {
+    flex-wrap: wrap;
+  }
+
+  /* ── Match cards ── */
+  .match-card {
+    padding: 14px;
+  }
+  .match-image {
+    width: 100%;
+    height: 150px;
+  }
+}
+
+/* ============================================
+    VERY SMALL PHONES  ≤ 360px
+   ============================================ */
+@media (max-width: 360px) {
+
+  .navbar {
+    padding: 8px 10px;
+    margin: 4px 6px;
+    border-radius: 8px;
+  }
+  .logo img {
+    max-height: 44px !important;
+    width: clamp(72px, 40vw, 110px) !important;
+  }
+  .btn {
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+
+  .hero {
+    padding: 20px 10px 28px;
+    min-height: calc(100vh - 76px);
+  }
+  .hero h2 {
+    font-size: 20px;
+  }
+  .hero h3 {
+    font-size: 18px;
+  }
+  .hero p {
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .action-btn {
+    font-size: 12px;
+    padding: 11px 12px;
+  }
+
+  .report-card {
+    padding: 12px 10px;
+  }
+  .card-title {
+    font-size: 17px;
+  }
+
+  .page-title {
+    font-size: 17px;
+  }
+
+  .modal-box {
+    padding: 14px 10px;
+    border-radius: 12px;
+  }
+  .modal-box h2 {
+    font-size: 16px;
+  }
+}
+
+/* ============================================
+    DESKTOP  ≥ 1200px
+   ============================================ */
+@media (min-width: 1200px) {
+  .container,
+  .page,
+  .report-wrapper,
+  .listings-wrapper {
+    max-width: 1200px;
+  }
+  .listing-grid,
+  .items-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================
+   ️ WIDE DESKTOP  ≥ 1400px
+   ============================================ */
+@media (min-width: 1400px) {
+  .container,
+  .page,
+  .report-wrapper,
+  .listings-wrapper {
+    max-width: 1300px;
+  }
+  .hero h2 {
+    font-size: 52px;
+  }
+  .hero h3 {
+    font-size: 46px;
+  }
+}
+
+/* ============================================
+    UNIVERSAL IMPROVEMENTS
+   ============================================ */
+
+/* Smooth transitions (exclude layout-affecting props to avoid jank) */
+a, button, .btn, .action-btn, .toggle, .item-card, .match-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
